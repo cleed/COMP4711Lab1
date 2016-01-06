@@ -32,46 +32,74 @@ and open the template in the editor.
 //        echo ($total > 0)?'You owe me '.$total : "You're welcome";
 //        
         // tictactoe
-        $position = $_GET['board'];
-        $squares = str_split($position);
-        //var_dump($squares);
         
-        function winner($token,$squares) {
-            // check rows
-            for($row=0; $row<3; $row++) {
-                $result = true;
-                for($col=0; $col<3; $col++){
-                    if ($squares[3*$row+$col] != $token){
-                        $result = false; // note the negative test
-                        break;
-                    }
-                }
-                if($result) return $result;
+        // game class
+        class Game {
+            var $position;
+            function __construct($squares){
+                $this->position = str_split($squares);
             }
-            // check columns
-            for($col=0; $col<3; $col++) {
-                $result = true;
-                for($row=0; $row<3; $row++){
-                    if ($squares[3*$row+$col] != $token){
-                        $result = false; // note the negative test
-                        break;
-                    }
-                }
-                if($result) return $result;
-            }
-            // check diagonal
             
-            // return $result;
+            // check winner
+            function winner($token) {
+                // check rows
+                for($row=0; $row<3; $row++) {
+                    $result = true;
+                    for($col=0; $col<3; $col++){
+                        if ($this->position[3*$row+$col] != $token){
+                            $result = false; // note the negative test
+                            break;
+                        }
+                    }
+                    if($result) return $result;
+                }
+                // check columns
+                for($col=0; $col<3; $col++) {
+                    $result = true;
+                    for($row=0; $row<3; $row++){
+                        if ($this->position[3*$row+$col] != $token){
+                            $result = false; // note the negative test
+                            break;
+                        }
+                    }
+                    if($result) return $result;
+                }
+                // check diagonal
+                if($this->position[4] == $token){
+                    if($this->position[0] == $token && $this->position[8])
+                        $result = true;
+                    else if($this->position[2] == $token && $this->position[6] == $token)
+                        $result = true;
+                    else
+                        $result = false;
+                }
+                return $result;
+            }
+            
+            
+            
+            
+            
+        
         }
+        
+        $squares = $_GET['board'];
+        $game = new Game($squares);
+        if ($game->winner('x')){
+            echo 'You win. Lucky guesses!';
+        } else if ($game->winner('o')){
+            echo 'I win. Muahahahaha';
+        } else {
+            echo 'No winner yet, but you are losing.';
+        }
+        
+        
+        
+        
+        
         
         
         
         ?>
     </body>
 </html>
-
-<?php
-    if (winner('x',$squares)) echo 'You win.';
-    else if (winner('o',$squares)) echo 'I win.';
-    else echo 'No winner yet.';
-?>
