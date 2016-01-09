@@ -9,13 +9,8 @@ and open the template in the editor.
         <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
         <title>Tic Tac Toe</title>
 		<style type="text/css">
-			a{
-				text-decoration: none;
-				color: #000;
-			}
-			.cell{
-				text-align: center;
-			}
+			a{text-decoration: none;color: #000;}
+			.cell{text-align: center;}
 		</style>
     </head>
     <body>
@@ -23,6 +18,7 @@ and open the template in the editor.
 
         // Tic tac toe game
         class Game {
+			var $game_finished = false;
             var $position;
 			// Constructor, saves the gameboard
             function __construct($squares){
@@ -56,7 +52,7 @@ and open the template in the editor.
                 }
                 // No winner found yet, check diagonals
                 if($this->position[4] == $token){
-                    if($this->position[0] == $token && $this->position[8])
+                    if($this->position[0] == $token && $this->position[8] == $token)
                         $result = true;
                     else if($this->position[2] == $token && $this->position[6] == $token)
                         $result = true;
@@ -90,14 +86,52 @@ and open the template in the editor.
 				$move = implode($this->newposition); // make a string from the board array
 				$link = '?board='.$move; // this is what we want the link to be
 				// so return a cell containing an anchor and showing a hyphen
-				return '<td class="cell"><a href="'.$link.'">-</a></td>';
+				return $this->game_finished?'<td class="cell">-</td>':'<td class="cell"><a href="'.$link.'">-</a></td>';
 			}
             
 			// AI for picking next best move
+			function pick_move(){
+				// Save available moves
+				$moves = array();
+				for($i=0; $i<9; $i++){
+					if($this->position[$i] == '-'){
+						array_push($moves, $i);
+					}
+				}
+				// Check for winning move
+				foreach($moves as $move){
+					$temp_position = $this->position;
+					$this->position[$move] = 'x';
+					if($this->winner('x')){
+						// Carry on with this move
+						return;
+					} else {
+						$this->position = $temp_position;
+					}
+				}
+				// Check for opponent winning move
+				foreach($moves as $move){
+					$temp_position = $this->position;
+					$this->position[$move] = 'o';
+					if($this->winner('o')){
+						// Make this move ours
+						$this->position[$move] = 'x';
+						return;
+					} else {
+						$this->position = $temp_position;
+					}
+				}
+				// No best move found, pick random of available
+				if(!empty($moves)){
+					$this->position[$moves[array_rand($moves)]] = 'x';
+				} else {
+					echo "OK we draw, for now";
+					$this->game_finished = true;
+				}
+			}
 			
+			// Stops the game by disabling further moves
 			
-            
-        
         }
         
 		// Updates the current board upon every request
@@ -107,24 +141,25 @@ and open the template in the editor.
 			$squares = "---------";
 		}
         $game = new Game($squares);
-		$game->display($squares);
 		// Stops the game if a winner is found
-        if ($game->winner('x')){
+        if ($game->winner('o')){
+			$game->game_finished = true;
             echo 'You win. Lucky guesses!';
-        } else if ($game->winner('o')){
-            echo 'I win. Muahahahaha';
         } else {
-            echo 'No winner yet, but you are losing.';
-        }
+			// Make a move
+			$game->pick_move();
+			// Check if the move wins the game
+			if ($game->winner('x')){
+				$game->game_finished = true;
+				echo 'I win. Muahahahaha';
+			} else {
+				echo "No winner yet, but you are losing!";
+			}
+		}
+		// Display the game board after this round
+		$game->display($squares);
 		// Restart resets board to empty state
         echo '<br/><a href="?board=---------">Restart</a>';
-        
-        
-        
-        
-        
-        
-        
         ?>
     </body>
 </html>
